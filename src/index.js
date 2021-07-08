@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {createStore} from "redux"
 import { Provider } from 'react-redux';
+import { uuid } from 'uuidv4'
 
 const initialState= {
 
@@ -16,14 +17,42 @@ const initialState= {
 
 const store = createStore(function(state= initialState, action){
   switch(action.type){
-    case "SEARCH_POST":
-      return{...state,error :true}
+    case "SET_ERROR":
+      if(state.error){
+        return{...state,error :false}
+      }else{return{...state,error :true}}
+      
+     case "RESET_VALUES":
+       return{...state,calculo:"",error:false}
+
 case "SET_VALUE":
   return{...state, calculo: state.calculo + action.payload}
 
-  case "FILTER_POST":
-    let newPost = state.posts.filter(post=> post.title.includes(action.payload))
-return{...state,filterPosts: newPost, searching:true}
+  case "GET_RESULT":
+    if(state.calculo===""){
+      return{...state, calculo: 0}
+    }else{return{...state,calculo: eval(state.calculo)}}
+
+  case "ADD_HISTORY":
+    const nuevaHistoria={
+      operacion: state.calculo,
+      resultado: eval(state.calculo),
+      id: uuid()
+    }
+    if(state.calculo ===0 || state.calculo ===""){
+      return
+    }else{
+      return{...state,historial: [...state.historial,nuevaHistoria],error:false}
+    }
+
+    case "DELETE_HISTORY":
+      const nuevoHistorial= state.historial.filter(historia=> historia.id !== action.payload)
+      return{...state,historial:nuevoHistorial}
+
+      case "ADD_RESULT":
+        const nuevoResultado= state.historial.filter(historia=>historia.id === action.payload)
+        return{...state,calculo:state.calculo + nuevoResultado[0].resultado}
+
 }
 
   
